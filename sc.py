@@ -11,9 +11,10 @@ def esci():
 def u():
     dir=os.getcwd()
     try:
-        os.mkdir(dir+'/u')
+        os.mkdir('u')
     except:
         print ("")
+u()
 win=tk.Tk()
 win.title("Satysfind chat")
 win.rowconfigure(0, weight=2, minsize=800)
