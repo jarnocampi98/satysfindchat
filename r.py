@@ -2,6 +2,7 @@ import os.path
 import tkinter
 from tkinter import *
 from ftplib import FTP
+import hashlib
 server='ftp.satysfind.altervista.org'
 user='satysfind'
 passwd='Satysfind18'
@@ -21,53 +22,77 @@ def esci():
     win.destroy()
 def reg():
     #print ("a")
-    global nu
-    global pa
-    nu=""
-    pa=""
-    nu = tuno.get()
-    pa = tdue.get()
-    if (nu=="" or pa==""):
-        l6.configure(text="Riempire i campi")
-        l6.pack()
-        return 0
-    dir=os.getcwd()
+	global nu
+	global pa
+	nu=""
+	pa=""
+	nu = tuno.get()
+	pa = tdue.get()
+	pa=str(pa)
+	pah = hashlib.md5(pa.encode())
+	pah=pah.hexdigest()
+	pah=str(pah)
+
+	if (nu=="" or pa==""):
+		l6.configure(text="Riempire i campi")
+		l6.pack()
+		return 0
+	dir=os.getcwd()
     #print(dir)
-    try:
-        os.chdir(dir+"/u")
-    except:
-        ok=0
-    try:
-        print ("ok")
-        if (os.path.exists(nu+".txt")):
+	try:
+		os.chdir(dir+"/u")
+	except:
+		ok=0
+	try:
+		print ("ok")
+		ftp.cwd("/sc/u")
+		print ("ok")
+		try:
+			ftp.cwd("/sc/u/"+nu)
+			print("Cartella già esistente")
+			l6.configure(text="Questo nome utente è già in uso(DIRECTORY ERROR)")
+			l6.pack()
+			return 0
+		except:
+			ftp.mkd(nu)
+			ftp.cwd("/sc/u/"+nu)
+		"""if (os.path.exists(nu+".txt")):
             l6.configure(text="Questo nome utente è già in uso")
             l6.pack()
-            return 0
+            return 0"""
+		try:
+			ftp.retrbinary('RETR '+nu+'.txt', open(nu+'.txt', 'wb').write)
+			l6.configure(text="Questo nome utente è già in uso(FILE ERROR)")
+			l6.pack()
+			os.remove(nu+'.txt')
+			return 0
 
-        else:
-            ftp.cwd("/sc/u")
-            f=open(nu+".txt", 'w')
-            f.write(pa)
-            f.close()
+		except:
+            #ftp.cwd("/sc/u")
+			f=open(nu+".txt", 'w')
+			f.write(pah)
+			f.close()
             #print ("ciao")
-            ftp.storbinary('STOR '+nu+'.txt', open(nu+'.txt', 'rb'))
-            #os.remove(nome+'.txt')
-            print ("UTENTE CREATO")
-            """ftp.retrbinary('RETR log.txt', open('log.txt', 'wb').write)
+			ftp.storbinary('STOR '+nu+'.txt', open(nu+'.txt', 'rb'))
+			os.remove(nu+'.txt')
+			print ("UTENTE CREATO")
+			"""ftp.retrbinary('RETR log.txt', open('log.txt', 'wb').write)
             ff=open('log.txt', 'a')
             ff.write('1'+nome+'\n2'+eta+'\n3'+sex+'\n40\n50\n')
             ff.close()
             ftp.storbinary('STOR log.txt', open('log.txt', 'rb'))"""
-            ftp.quit()
+			ftp.mkd("messaggi_r")
+			ftp.mkd("messaggi_i")
+			ftp.quit()
             #print ("funia")
-            win.destroy()
-            import accedi.py
+			win.destroy()
+			import rc.py
     		#padre.destroy()
     		#import saty.py
-    except:
-        print("ERRORE CARTELLA\n")
-        print (os.getcwd())
-        return 0
+	except:
+		print("ERRORE CARTELLA\n")
+		print (os.getcwd())
+		return 0
 
 win=Tk()
 win.title("Satysfind chat-registrati")
